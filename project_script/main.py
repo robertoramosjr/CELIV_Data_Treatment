@@ -1,5 +1,6 @@
-import sys
 import os.path
+
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import integrate
@@ -11,11 +12,6 @@ def separate_even_columns(data_frame):
 
 def separate_odd_columns(data_frame):
     return data_frame.iloc[:, [i for i in range(len(data_frame.columns)) if i % 2 == 0]]
-
-
-# def integrate_data_frame(data_frame):
-#     return data_frame\
-#         .apply(lambda g: integrate.trapz(g.separate_even_columns(data_frame), x=g.separate_odd_columns(data_frame)))
 
 
 def is_valid_file(file_path):
@@ -56,10 +52,10 @@ dark_CELIV = pd.read_table(path_dark, sep='\t')
 
 current_dark_celiv_ramp_time = separate_even_columns(dark_CELIV).abs()
 
-x = ask_x_axys()
-
-y = ask_y_axys()
-
+# x = ask_x_axys()
+# 
+# y = ask_y_axys()
+# 
 # plot_the_data(dark_CELIV, x, y)
 # plt.show()
 
@@ -77,6 +73,14 @@ even_columns_subtraction = pd.DataFrame(current_photo_celiv_ramp_time - current_
 
 data_ramp_time = pd.concat([time_photo_celiv_ramp_time, even_columns_subtraction], axis=1).sort_index(1, 1)
 
-# data_ramp_time.to_csv(ask_file_name(), sep='\t')
+data_ramp_time.to_csv(ask_file_name(), sep='\t')
 
-# pd.DataFrame(integrate_data_frame(data_ramp_time)).to_csv(ask_file_name(), sep='\t')
+data_ramp_time_transposed_in_array = data_ramp_time.transpose().to_numpy()
+
+
+integrated_val = integrate\
+    .simps(data_ramp_time_transposed_in_array[3], data_ramp_time_transposed_in_array[2], axis=-1, even='avg')
+
+print(integrated_val)
+
+
