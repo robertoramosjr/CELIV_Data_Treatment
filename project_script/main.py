@@ -75,12 +75,17 @@ data_ramp_time = pd.concat([time_photo_celiv_ramp_time, even_columns_subtraction
 
 data_ramp_time.to_csv(ask_file_name(), sep='\t')
 
-data_ramp_time_transposed_in_array = data_ramp_time.transpose().to_numpy()
+data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
 
 
 integrated_val = integrate\
-    .simps(data_ramp_time_transposed_in_array[3], data_ramp_time_transposed_in_array[2], axis=-1, even='avg')
+    .simps(data_ramp_time_transposed_in_arrays[3], data_ramp_time_transposed_in_arrays[2], axis=-1, even='avg')
+"""
+A função acima está com os números mágicos 3 e 2, que se referem as strings de referência para integração.
 
+Assim que eu adicionar a iteração em todas as arrays (ímpares para o primeiro argumento e pares para o segundo) eles
+sairão naturalmente.
+"""
 print(integrated_val)
 
 
