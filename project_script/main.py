@@ -43,7 +43,7 @@ while not is_valid_file(path_dark):
     message_invalid_path()
     path_dark = ask_file_path("dark-CELIV")
 
-dark_CELIV = pd.read_table(path_dark, sep='\t')
+dark_CELIV = pd.read_table(path_dark, sep='\t', header=None)
 
 current_dark_celiv_ramp_time = separate_even_columns(dark_CELIV).abs()
 
@@ -73,5 +73,3 @@ integrated_val = integrate.simps(
     axis=-1, even='avg')
 
 print(integrated_val)
-
-
