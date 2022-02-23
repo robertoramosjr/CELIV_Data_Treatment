@@ -43,9 +43,8 @@ while not is_valid_file(path_dark):
     message_invalid_path()
     path_dark = ask_file_path("dark-CELIV")
 
-dark_CELIV = pd.read_table(path_dark, sep='\t')
-
-current_dark_celiv_ramp_time = separate_even_columns(dark_CELIV).abs()
+current_dark_celiv_ramp_time = separate_even_columns(
+    pd.read_table(path_dark, sep='\t', header=None)).abs()
 
 path_photo = ask_file_path("photo_celiv")
 
@@ -53,19 +52,21 @@ while not is_valid_file(path_photo):
     message_invalid_path()
     path_photo = ask_file_path("photo-celiv")
 
-current_photo_celiv_ramp_time = (separate_even_columns(pd.read_table(path_photo, sep='\t', header=None))).abs()
+current_photo_celiv_ramp_time = (separate_even_columns(
+    pd.read_table(path_photo, sep='\t', header=None))).abs()
 
-time_photo_celiv_ramp_time = separate_odd_columns(pd.read_table(path_photo, sep='\t', header=None))
+time_photo_celiv_ramp_time = separate_odd_columns(
+    pd.read_table(path_photo, sep='\t', header=None))
 
-even_columns_subtraction = pd.DataFrame(current_photo_celiv_ramp_time - current_dark_celiv_ramp_time)
+even_columns_subtraction = pd.DataFrame(
+    current_photo_celiv_ramp_time - current_dark_celiv_ramp_time)
 
 data_ramp_time = pd.concat([time_photo_celiv_ramp_time, even_columns_subtraction],
                            axis=1).sort_index(1, 1)
 
 data_ramp_time.to_csv(ask_file_name(), sep='\t')
 
-data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_np()
-
+data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
 
 integrated_val = integrate.simps(
     data_ramp_time_transposed_in_arrays[3],
