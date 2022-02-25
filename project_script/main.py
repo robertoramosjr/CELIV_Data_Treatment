@@ -54,14 +54,11 @@ def sanitize_data_frames():
 
 
 def integrate_current_over_time():
-    global data_ramp_time_transposed_in_arrays
-    i = 1
+    global time_photo_celiv_ramp_time_transposed, even_columns_subtracted_transposed_in_arrays
     integrated_values = []
-    while i <= len(data_ramp_time_transposed_in_arrays) - 1:
-        integrated_values.append(integrate.simps(data_ramp_time_transposed_in_arrays[i],
-                                                 data_ramp_time_transposed_in_arrays[i - 1],
-                                                 axis=-1, even='avg'))
-        i = i + 2
+    for k, v in enumerate(even_columns_subtracted_transposed_in_arrays):
+        integrated_values.append(integrate.simps(even_columns_subtracted_transposed_in_arrays[k],
+                                                 time_photo_celiv_ramp_time_transposed[k], even='avg'))
     return integrated_values
 
 # path_dark = ask_file_path("dark-CELIV")
@@ -71,7 +68,8 @@ def integrate_current_over_time():
 #     path_dark = ask_file_path("dark-CELIV")
 #
 current_dark_celiv_ramp_time = separate_even_columns(
-    pd.read_table("C:/Users/robee/Desktop/2-dark-celiv-current-celiv-only-alterado.txt", sep='\t', header=None)).abs()
+    pd.read_table("C:/Users/robee/Desktop/2-dark-celiv-current-celiv-only-alterado.txt",
+                  sep='\t', header=None)).abs()
 
 # path_photo = ask_file_path("photo_celiv")
 
@@ -80,11 +78,12 @@ current_dark_celiv_ramp_time = separate_even_columns(
 #     path_photo = ask_file_path("photo-celiv")
 
 current_photo_celiv_ramp_time = (separate_even_columns(
-    pd.read_table("C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt", sep='\t',
-                  header=None))).abs()
+    pd.read_table("C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt",
+                  sep='\t', header=None))).abs()
 
 time_photo_celiv_ramp_time = separate_odd_columns(
-    pd.read_table("C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt", sep='\t', header=None))
+    pd.read_table("C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt",
+                  sep='\t', header=None))
 
 even_columns_subtracted = current_photo_celiv_ramp_time.\
     subtract(current_dark_celiv_ramp_time).dropna()
@@ -94,10 +93,17 @@ sanitize_data_frames()
 data_ramp_time = pd.concat([time_photo_celiv_ramp_time, even_columns_subtracted],
                            axis=1).sort_index(axis=1)
 
+# data_ramp_time.to_excel("C:/Users/robee/Desktop/data_ramp_time.xlsx")
+
 # data_ramp_time.to_csv(ask_file_name(), sep='\t') #line commented to run tests
 
 data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
 
+time_photo_celiv_ramp_time_transposed = time_photo_celiv_ramp_time.transpose().to_numpy()
+
+even_columns_subtracted_transposed_in_arrays = even_columns_subtracted.transpose().to_numpy()
+
 integration_results = integrate_current_over_time()
 
-print(integration_results)
+# pd.DataFrame(integration_results).to_csv("C:/Users/robee/Desktop/integral_values.txt")
+
