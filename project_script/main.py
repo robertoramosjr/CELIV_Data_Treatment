@@ -63,7 +63,8 @@ def integrate_data():
 current_dark_celiv_ramp_time = separate_even_columns(
     pd.read_table("C:/Users/robee/Desktop/2-dark-celiv-current-celiv-only-alterado.txt",
                   sep='\t', header=None))\
-    .abs()
+    .abs()\
+    .dropna()
 
 # path_photo = ask_file_path("photo_celiv")
 
@@ -99,7 +100,5 @@ time_photo_celiv_ramp_time_transposed = time_photo_celiv_ramp_time.transpose().t
 
 even_columns_subtracted_transposed_in_arrays = even_columns_subtracted.transpose().to_numpy()
 
-integration_results = integrate_data()
-
-# pd.DataFrame(integration_results).to_csv("C:/Users/robee/Desktop/integral_values.txt")
+pd.DataFrame(integrate_data()).to_csv("C:/Users/robee/Desktop/integral_values.txt")
 
