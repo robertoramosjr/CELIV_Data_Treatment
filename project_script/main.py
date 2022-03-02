@@ -64,7 +64,7 @@ charge_density_correction_factor = 1*10**(-6)
 charge_density_calculation_constant = current_correction_factor * charge_density_correction_factor \
                                       / (electron_charge * device_area * device_thickness)
 
-# path_dark = ask_file_path("dark-CELIV")
+# path_dark = ask.ask_file_path("dark-CELIV")
 #
 # while not is_valid_file(path_dark):
 #     message_invalid_path()
