@@ -29,37 +29,30 @@ def ask_file_name():
     return input("Insira o nome do arquivo para salvar \n")
 
 
-def ask_x_axis():
-    return input('Insira o cabeçalho do eixo x a ser considerado para o plote \n')
-
-
-def ask_y_axis():
-    return input('Insira o cabeçalho do eixo y a ser considerado para o plote \n')
-
-
 def is_bigger_data_frame(data_frame_1, data_frame_2):
-    return len(data_frame_1) < len(data_frame_2)
+    return len(data_frame_1) > len(data_frame_2)
 
 
-def slice_data_frame_rows(data_frame_1, data_frame_2):
+def equalize_data_frame_rows(data_frame_1, data_frame_2):
     return data_frame_1.loc[0:len(data_frame_2)-1, :]
 
 
 def sanitize_data_frames():
     global even_columns_subtracted, time_photo_celiv_ramp_time
-    if is_bigger_data_frame(even_columns_subtracted, time_photo_celiv_ramp_time):
-        time_photo_celiv_ramp_time = slice_data_frame_rows(time_photo_celiv_ramp_time, even_columns_subtracted)
+    if is_bigger_data_frame(time_photo_celiv_ramp_time, even_columns_subtracted):
+        time_photo_celiv_ramp_time = equalize_data_frame_rows(time_photo_celiv_ramp_time, even_columns_subtracted)
         return
-    even_columns_subtracted = slice_data_frame_rows(even_columns_subtracted, time_photo_celiv_ramp_time)
+    even_columns_subtracted = equalize_data_frame_rows(even_columns_subtracted, time_photo_celiv_ramp_time)
 
 
-def integrate_current_over_time():
+def integrate_data():
     global time_photo_celiv_ramp_time_transposed, even_columns_subtracted_transposed_in_arrays
     integrated_values = []
-    for k, v in enumerate(even_columns_subtracted_transposed_in_arrays):
-        integrated_values.append(integrate.simps(even_columns_subtracted_transposed_in_arrays[k],
-                                                 time_photo_celiv_ramp_time_transposed[k], even='avg'))
+    for key, value in enumerate(even_columns_subtracted_transposed_in_arrays):
+        integrated_values.append(integrate.simps(even_columns_subtracted_transposed_in_arrays[key],
+                                                 time_photo_celiv_ramp_time_transposed[key], even='avg'))
     return integrated_values
+
 
 # path_dark = ask_file_path("dark-CELIV")
 #
@@ -69,7 +62,8 @@ def integrate_current_over_time():
 #
 current_dark_celiv_ramp_time = separate_even_columns(
     pd.read_table("C:/Users/robee/Desktop/2-dark-celiv-current-celiv-only-alterado.txt",
-                  sep='\t', header=None)).abs()
+                  sep='\t', header=None))\
+    .abs()
 
 # path_photo = ask_file_path("photo_celiv")
 
@@ -79,14 +73,16 @@ current_dark_celiv_ramp_time = separate_even_columns(
 
 current_photo_celiv_ramp_time = (separate_even_columns(
     pd.read_table("C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt",
-                  sep='\t', header=None))).abs()
+                  sep='\t', header=None)))\
+    .abs()
 
 time_photo_celiv_ramp_time = separate_odd_columns(
     pd.read_table("C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt",
                   sep='\t', header=None))
 
-even_columns_subtracted = current_photo_celiv_ramp_time.\
-    subtract(current_dark_celiv_ramp_time).dropna()
+even_columns_subtracted = current_photo_celiv_ramp_time\
+    .subtract(current_dark_celiv_ramp_time)\
+    .dropna()
 
 sanitize_data_frames()
 
@@ -103,7 +99,7 @@ time_photo_celiv_ramp_time_transposed = time_photo_celiv_ramp_time.transpose().t
 
 even_columns_subtracted_transposed_in_arrays = even_columns_subtracted.transpose().to_numpy()
 
-integration_results = integrate_current_over_time()
+integration_results = integrate_data()
 
 # pd.DataFrame(integration_results).to_csv("C:/Users/robee/Desktop/integral_values.txt")
 
