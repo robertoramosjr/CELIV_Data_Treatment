@@ -11,29 +11,29 @@ def message_invalid_path():
 
 
 def sanitize_data_frames():
-    global even_columns_subtracted, time_photo_celiv_ramp_time
+    global odd_columns_subtracted, time_photo_celiv_ramp_time
     if dt.is_bigger_data_frame(
             time_photo_celiv_ramp_time,
-            even_columns_subtracted
+            odd_columns_subtracted
     ):
         time_photo_celiv_ramp_time = dt.equalize_data_frame_rows(
             time_photo_celiv_ramp_time,
-            even_columns_subtracted
+            odd_columns_subtracted
         )
         return
-    even_columns_subtracted = dt.equalize_data_frame_rows(
-        even_columns_subtracted,
+    odd_columns_subtracted = dt.equalize_data_frame_rows(
+        odd_columns_subtracted,
         time_photo_celiv_ramp_time
     )
 
 
 def integrate_data():
-    global time_photo_celiv_ramp_time_transposed, even_columns_subtracted_transposed_in_arrays
+    global time_photo_celiv_ramp_time_transposed, odd_columns_subtracted_transposed_in_arrays
     integrated_values = []
-    for key, value in enumerate(even_columns_subtracted_transposed_in_arrays):
+    for key, value in enumerate(odd_columns_subtracted_transposed_in_arrays):
         integrated_values.append(
             integrate.simps(
-                even_columns_subtracted_transposed_in_arrays[key],
+                odd_columns_subtracted_transposed_in_arrays[key],
                 time_photo_celiv_ramp_time_transposed[key],
                 even='avg'
             )
@@ -52,7 +52,7 @@ charge_density_calculation_constant = cv.current_correction_factor * cv.charge_d
 #     message_invalid_path()
 #     path_dark = ask.file_path("dark-CELIV")
 #
-current_dark_celiv_ramp_time = dt.separate_even_columns(
+current_dark_celiv_ramp_time = dt.separate_odd_columns(
     pd.read_table(
         "C:/Users/robee/Desktop/2-dark-celiv-current-celiv-only-alterado.txt",
         sep='\t',
@@ -68,7 +68,7 @@ current_dark_celiv_ramp_time = dt.separate_even_columns(
 #     message_invalid_path()
 #     path_photo = ask.file_path("photo-celiv")
 
-current_photo_celiv_ramp_time = dt.separate_even_columns(
+current_photo_celiv_ramp_time = dt.separate_odd_columns(
     pd.read_table(
         "C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt",
         sep='\t',
@@ -77,7 +77,7 @@ current_photo_celiv_ramp_time = dt.separate_even_columns(
 )\
     .abs()
 
-time_photo_celiv_ramp_time = dt.separate_odd_columns(
+time_photo_celiv_ramp_time = dt.separate_even_columns(
     pd.read_table(
         "C:/Users/robee/Desktop/3-photo-celiv-basic-current-celiv-only-alterado.txt",
         sep='\t',
@@ -85,14 +85,14 @@ time_photo_celiv_ramp_time = dt.separate_odd_columns(
     )
 )
 
-even_columns_subtracted = current_photo_celiv_ramp_time\
+odd_columns_subtracted = current_photo_celiv_ramp_time\
     .subtract(current_dark_celiv_ramp_time)\
     .dropna()
 
 sanitize_data_frames()
 
 data_ramp_time = pd.concat(
-    [time_photo_celiv_ramp_time, even_columns_subtracted],
+    [time_photo_celiv_ramp_time, odd_columns_subtracted],
     axis=1
 )\
     .sort_index(axis=1)
@@ -105,7 +105,7 @@ data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
 
 time_photo_celiv_ramp_time_transposed = time_photo_celiv_ramp_time.transpose().to_numpy()
 
-even_columns_subtracted_transposed_in_arrays = even_columns_subtracted.transpose().to_numpy()
+odd_columns_subtracted_transposed_in_arrays = odd_columns_subtracted.transpose().to_numpy()
 
 integration_results = integrate_data()
 
@@ -114,7 +114,7 @@ integration_results = integrate_data()
 density_of_carriers = [element * charge_density_calculation_constant for element in integration_results]
 
 pd.DataFrame(density_of_carriers).to_csv(
-    "C:/Users/robee/Desktop/density_of_carriers.txt",
+    "C:/Users/robee/Desktop/density_of_carriers_test.txt",
     sep='\t',
     decimal=','
 )

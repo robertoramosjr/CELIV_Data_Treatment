@@ -1,12 +1,12 @@
 import os.path
 
 
-def separate_even_columns(data_frame):
-    return data_frame.iloc[:, [i for i in range(len(data_frame.columns)) if i % 2 == 1]]
-
-
 def separate_odd_columns(data_frame):
-    return data_frame.iloc[:, [i for i in range(len(data_frame.columns)) if i % 2 == 0]]
+    return data_frame.iloc[:, 1::2]
+
+
+def separate_even_columns(data_frame):
+    return data_frame.iloc[:, ::2]
 
 
 def is_valid_file(file_path):
