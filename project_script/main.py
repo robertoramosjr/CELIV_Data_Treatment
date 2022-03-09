@@ -12,19 +12,10 @@ def message_invalid_path():
 
 def sanitize_data_frames():
     global odd_columns_subtracted, time_photo_celiv_ramp_time
-    if dt.is_bigger_data_frame(
-            time_photo_celiv_ramp_time,
-            odd_columns_subtracted
-    ):
-        time_photo_celiv_ramp_time = dt.equalize_data_frame_rows(
-            time_photo_celiv_ramp_time,
-            odd_columns_subtracted
-        )
+    if dt.is_bigger_data_frame(time_photo_celiv_ramp_time, odd_columns_subtracted):
+        time_photo_celiv_ramp_time = dt.equalize_data_frame_rows(time_photo_celiv_ramp_time, odd_columns_subtracted)
         return
-    odd_columns_subtracted = dt.equalize_data_frame_rows(
-        odd_columns_subtracted,
-        time_photo_celiv_ramp_time
-    )
+    odd_columns_subtracted = dt.equalize_data_frame_rows(odd_columns_subtracted, time_photo_celiv_ramp_time)
 
 
 def integrate_data():
@@ -43,8 +34,8 @@ def integrate_data():
 
 # device_thickness = ask.device_thickness()
 # device_area = ask.device_area()
-charge_density_calculation_constant = cv.current_correction_factor * cv.charge_density_correction_factor \
-                                      / (cv.electron_charge * cv.device_area * cv.device_thickness)
+CHARGE_DENSITY_CALCULATION = cv.CURRENT_CORRECTION_FACTOR * cv.CHARGE_DENSITY_CORRECTION_FACTOR \
+                                      / (cv.ELECTRON_CHARGE * cv.DEVICE_AREA * cv.DEVICE_THICKNESS)
 
 # path_dark = ask.file_path("dark-CELIV")
 #
@@ -58,7 +49,7 @@ current_dark_celiv_ramp_time = dt.separate_odd_columns(
         sep='\t',
         header=None
     )
-)\
+    )\
     .abs()\
     .dropna()
 
@@ -74,7 +65,7 @@ current_photo_celiv_ramp_time = dt.separate_odd_columns(
         sep='\t',
         header=None
     )
-)\
+    )\
     .abs()
 
 time_photo_celiv_ramp_time = dt.separate_even_columns(
@@ -92,14 +83,14 @@ odd_columns_subtracted = current_photo_celiv_ramp_time\
 sanitize_data_frames()
 
 data_ramp_time = pd.concat(
-    [time_photo_celiv_ramp_time, odd_columns_subtracted],
-    axis=1
-)\
+        [time_photo_celiv_ramp_time, odd_columns_subtracted],
+        axis=1
+    )\
     .sort_index(axis=1)
 
 # data_ramp_time.to_excel("C:/Users/robee/Desktop/data_ramp_time.xlsx")
 
-# data_ramp_time.to_csv(ask.file_name(), sep='\t') #line commented to run tests
+data_ramp_time.to_csv(ask.file_name(), sep='\t')     # line commented to run tests
 
 data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
 
@@ -111,10 +102,10 @@ integration_results = integrate_data()
 
 # pd.DataFrame(integrate_data()).to_csv("C:/Users/robee/Desktop/integral_values.txt")
 
-density_of_carriers = [element * charge_density_calculation_constant for element in integration_results]
+density_of_carriers = [element * CHARGE_DENSITY_CALCULATION for element in integration_results]
 
 pd.DataFrame(density_of_carriers).to_csv(
     "C:/Users/robee/Desktop/density_of_carriers_test.txt",
     sep='\t',
     decimal=','
-)
+    )

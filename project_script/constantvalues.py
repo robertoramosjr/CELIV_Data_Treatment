@@ -1,9 +1,9 @@
-electron_charge = 1.6*10**(-19)
+ELECTRON_CHARGE = 1.6 * 10 ** (-19)
 
-device_area = 1.4*10**(-5)
+DEVICE_AREA = 1.4 * 10 ** (-5)
 
-device_thickness = 600*10**(-9)
+DEVICE_THICKNESS = 600 * 10 ** (-9)
 
-current_correction_factor = 1*10**(-9)
+CURRENT_CORRECTION_FACTOR = 1 * 10 ** (-9)
 
-charge_density_correction_factor = 1*10**(-6)
+CHARGE_DENSITY_CORRECTION_FACTOR = 1 * 10 ** (-6)
