@@ -48,7 +48,7 @@ current_photo_celiv_ramp_time = dt.separate_odd_columns(
         sep='\t',
         header=None
     )
-    )\
+)\
     .abs()
 
 time_photo_celiv_ramp_time = dt.separate_even_columns(
@@ -81,7 +81,7 @@ odd_columns_subtracted_transposed_in_arrays = odd_columns_subtracted.transpose()
 
 integration_results = dt.integrate_data(
     odd_columns_subtracted_transposed_in_arrays, time_photo_celiv_ramp_time_transposed
-    )
+)
 
 # pd.DataFrame(integrate_data()).to_csv("C:/Users/robee/Desktop/integral_values.txt")
 
@@ -103,12 +103,14 @@ time_max_values = dt.flatten_list_of_lists(dt.find_time_max(time_photo_celiv_ram
 
 peak_values = pd.DataFrame([current_peaks, time_max_values]).transpose().set_axis(['current peak', 'peak time'], axis=1)
 
-peak_values['first term of mobility calculations'] = cv.DEVICE_THICKNESS ** 2 / (2 * peak_values['peak time'] ** 2) \
+peak_values['first term of mobility calculations'] = cv.DEVICE_THICKNESS ** 2 / (2 * peak_values['peak time'] ** 2)\
     .round(decimals=30)
 
-last_current = pd.DataFrame(
-    current_dark_celiv_ramp_time.iloc[len(current_dark_celiv_ramp_time)-1, x]
-    for x in list(range(0, (len(current_dark_celiv_ramp_time.columns)))))
+peak_values['j0'] = pd.DataFrame(
+        current_dark_celiv_ramp_time.iloc[len(current_dark_celiv_ramp_time)-1, x]
+        for x in list(range(0, (len(current_dark_celiv_ramp_time.columns))))
+)\
+    .round(decimals=30)
 
 for k, v in enumerate(odd_columns_subtracted_smoothed):
     plt.plot(time_photo_celiv_ramp_time_transposed[k], odd_columns_subtracted_smoothed[k])
