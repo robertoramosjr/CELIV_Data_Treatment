@@ -3,7 +3,7 @@ def file_name():
 
 
 def file_path(measurement_name):
-    return input(f"Insira o caminho do arquivo do {measurement_name} ramptime \n")
+    return input(f"Insira o caminho do arquivo do {measurement_name} CELIV \n")
 
 
 def device_area():
