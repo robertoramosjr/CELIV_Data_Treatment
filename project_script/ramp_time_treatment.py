@@ -93,29 +93,15 @@ peak_values['first term of mobility calculations (cm^2/s)'] = (
     )\
     .round(decimals=30)
 
-displacement_current = pd.Series(
-        current_dark_celiv_ramp_time.iloc[len(current_dark_celiv_ramp_time)-1, x]
-        for x in list(range(0, (len(current_dark_celiv_ramp_time.columns))))
-    )\
-    .round(decimals=30)
+displacement_current = dt.find_displacement_current(current_dark_celiv_ramp_time)
 
 peak_values['j0 (A/m^2)'] = displacement_current * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
 
 peak_values['ramp rates (V/s)'] = pd.Series(list(range(initial_ramp, final_ramp, ramp_step)) * meas_number)\
     .sort_values(ascending=True, ignore_index=True)
 
-results['mobility (cm^2 / Vs)'] = (
-        peak_values['first term of mobility calculations (cm^2/s)'] /
-        peak_values['ramp rates (V/s)']
-    ) *\
-    (
-        (
-            (1 / (6.2 * (1 + (0.002 * (peak_values['delta_j (A/m^2)'] / peak_values['j0 (A/m^2)']))))) +
-            (1 / (1 + (0.12 * (peak_values['delta_j (A/m^2)'] / peak_values['j0 (A/m^2)']))))
-        )
-        ** 2
-    )\
-    .round(30)
+results['mobility (cm^2 / Vs)'] = dt.mobility_calculus(peak_values)
+
 
 results['ramp rate (V/s'] = peak_values['ramp rates (V/s)']
 

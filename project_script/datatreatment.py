@@ -2,7 +2,7 @@ import os.path
 import numpy as np
 from scipy.signal import savgol_filter
 from scipy import integrate
-
+import pandas as pd
 
 def separate_odd_columns(data_frame):
     return data_frame.iloc[:, 1::2]
@@ -63,3 +63,36 @@ def find_time_max(array, index_list):
 
 def flatten_list_of_lists(list_of_lists):
     return [item for sublist in list_of_lists for item in sublist]
+
+
+def mobility_calculus(data_frame_with_required_data):
+    mobility = (
+        data_frame_with_required_data['first term of mobility calculations (cm^2/s)'] /
+        data_frame_with_required_data['ramp rates (V/s)']
+        ) *\
+        (
+        (
+            (1 / (6.2 * (1 + (0.002 * (
+                data_frame_with_required_data['delta_j (A/m^2)'] /
+                data_frame_with_required_data['j0 (A/m^2)']
+                )
+            )))) +
+            (1 / (1 + (0.12 * (
+                data_frame_with_required_data['delta_j (A/m^2)'] /
+                data_frame_with_required_data['j0 (A/m^2)']
+                )
+            )))
+        )
+        ** 2
+        )\
+        .round(30)
+    return mobility
+
+
+def find_displacement_current(dark_celiv_current_results):
+    displacement_current_values = pd.Series(
+            dark_celiv_current_results.iloc[len(dark_celiv_current_results) - 1, x]
+            for x in list(range(0, (len(dark_celiv_current_results.columns))))
+        ) \
+            .round(decimals=30)
+    return displacement_current_values
