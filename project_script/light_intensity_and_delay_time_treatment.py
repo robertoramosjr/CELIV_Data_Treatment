@@ -10,7 +10,7 @@ import messages as msgs
 # data_path = ask.file_path("light instensity or delay time")
 # while not dt.is_valid_file(data_path):
 #     msgs.message_invalid_path()
-#     ask.file_path("li_or_delay_time")
+#     ask.file_path("light intensity")
 
 # DEVICE_THICKNESS = ask.device_thickness()
 # DEVICE_AREA = ask.device_area()
