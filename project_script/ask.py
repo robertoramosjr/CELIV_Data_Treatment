@@ -15,7 +15,7 @@ def device_thickness():
 
 
 def scan_rate():
-    return float(input('Qual a taxa de varredura?'))
+    return float(input('Qual a taxa de varredura em V/s? \n'))
 
 
 def initial_ramp_rate():
@@ -26,8 +26,16 @@ def final_ramp_rate():
     return int(input('Qual a velocidade da última rampa da medida em V/s? \n'))
 
 
-def meas_number():
-    return int(input('Quantas medidas de um mesmo tipo os arquivos possuem? \n'))
+def meas_number(tipo_de_medida):
+    return int(input(f'Quantas medidas de um mesmo tipo os arquivos da {tipo_de_medida} possuem? \n'))
+
+
+def intensity_number():
+    return int(input('Quantas intensidades de luz foram medidas? \n'))
+
+
+def delay_time_number():
+    return int(input('Quantos delay times foram medidos? \n'))
 
 
 def ramp_step():
