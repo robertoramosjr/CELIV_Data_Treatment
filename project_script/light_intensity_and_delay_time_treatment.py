@@ -15,15 +15,15 @@ def sanitize_data_frames():
     current_delay_time = dt.equalize_data_frame_rows(current_delay_time, dark_celiv_delay_time)
 
 
-intensity_data = ask.file_path("light instensity")
-while not dt.is_valid_file(intensity_data):
+intensity_path = ask.file_path("light instensity")
+while not dt.is_valid_file(intensity_path):
     msgs.message_invalid_path()
-    intensity_data = ask.file_path("light intensity")
+    intensity_path = ask.file_path("light intensity")
 
-delay_time_data = ask.file_path('delay_time')
-while not dt.is_valid_file(delay_time_data):
+delay_time_path = ask.file_path('delay_time')
+while not dt.is_valid_file(delay_time_path):
     msgs.message_invalid_path()
-    delay_time_data = ask.file_path('delay_time')
+    delay_time_path = ask.file_path('delay_time')
 
 device_thickness = ask.device_thickness() * cv.NANOMETER_TO_METER
 device_area = ask.device_area() * cv.SQR_CENTIMETER_TO_SQR_METER
@@ -37,8 +37,8 @@ delay_time_number = ask.delay_time_number()
 
 CHARGE_DENSITY_CALCULATION = cv.CTTS_PRODUCT / (device_area * device_thickness)
 
-data_file_intensity = pd.read_table(intensity_data, sep='\t', header=None).abs().dropna()
-data_file_delay_time = pd.read_table(delay_time_data, sep='\t', header=None).abs().dropna()
+data_file_intensity = dt.read_data(intensity_path).abs().dropna()
+data_file_delay_time = dt.read_data(delay_time_path).abs().dropna()
 
 
 time_intensity = dt.separate_even_columns(data_file_intensity).iloc[:, 1:]

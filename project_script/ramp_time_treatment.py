@@ -31,7 +31,9 @@ while not dt.is_valid_file(path_dark):
     path_dark = ask.file_path("dark-CELIV")
 
 
-current_dark_celiv_ramp_time = dt.separate_odd_columns(pd.read_table(path_dark, sep='\t', header=None)).abs().dropna()
+current_dark_celiv_ramp_time = dt.separate_odd_columns(dt.read_data(path_dark))
+
+
 current_dark_celiv_ramp_time_as_array = current_dark_celiv_ramp_time.transpose().to_numpy()
 
 path_photo = ask.file_path("ramp time photo")
@@ -40,7 +42,7 @@ while not dt.is_valid_file(path_photo):
     msgs.message_invalid_path()
     path_photo = ask.file_path("photo-celiv")
 
-current_photo_celiv_ramp_time = dt.separate_odd_columns(pd.read_table(path_photo, sep='\t', header=None)).abs()
+current_photo_celiv_ramp_time = dt.separate_odd_columns(dt.read_data(path_photo)).abs()
 
 time_photo_celiv_ramp_time = dt.separate_even_columns(pd.read_table(path_photo, sep='\t', header=None))
 

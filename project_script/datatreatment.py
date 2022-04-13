@@ -2,6 +2,7 @@ import os.path
 import numpy as np
 from scipy.signal import savgol_filter
 from scipy import integrate
+import pandas as pd
 
 
 def separate_odd_columns(data_frame):
@@ -10,6 +11,13 @@ def separate_odd_columns(data_frame):
 
 def separate_even_columns(data_frame):
     return data_frame.iloc[:, ::2]
+
+
+def read_data(path):
+    if path.endswith('.txt:'):
+        return pd.read_table(path, sep='\t', header=None)
+    elif path.endwith('.xlsx'):
+        return pd.read_excel(path, sheet_name='Planilha1', header=None, engine="openpyxl")
 
 
 def is_valid_file(file_path):
