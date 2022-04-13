@@ -13,3 +13,19 @@ for k, v in enumerate(odd_columns_subtracted_smoothed):
     plt.scatter(time_max_values[k], current_peaks[k])
     plt.show()
 """
+
+############## Intensity CELIV ###################################
+ramp_rate = 60000
+
+
+C:/Users/robee/Desktop/4-photo-celiv-intensity-device1_cell1-current-celiv-only-alterado.txt
+C:/Users/robee/Desktop/5-otrace-celiv-device1_cell1-current-celiv-only-alterado.txt
+
+
+data_file_intensity = pd.read_table(
+    "C:/Users/robee/Desktop/4-photo-celiv-intensity-device1_cell1-current-celiv-only-alterado.txt",
+    sep='\t',
+    header=None)\
+    .abs()\
+    .dropna()\
+    .iloc[:776, :]

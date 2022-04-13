@@ -4,12 +4,20 @@ from scipy.signal import savgol_filter
 from scipy import integrate
 import pandas as pd
 
+
 def separate_odd_columns(data_frame):
     return data_frame.iloc[:, 1::2]
 
 
 def separate_even_columns(data_frame):
     return data_frame.iloc[:, ::2]
+
+
+def read_data(path):
+    if path.endswith('.txt:'):
+        return pd.read_table(path, sep='\t', header=None)
+    elif path.endwith('.xlsx'):
+        return pd.read_excel(path, sheet_name='Planilha1', header=None, engine="openpyxl")
 
 
 def is_valid_file(file_path):
@@ -40,24 +48,24 @@ def smooth_current_noise(current_data_as_array):
     return temp_list
 
 
-def find_peaks(data_as_list):
+def find_peaks(current_smoothed_as_array):
     temp_list = []
-    for key, value in enumerate(data_as_list):
-        temp_list.append(data_as_list[key].max())
+    for key, value in enumerate(current_smoothed_as_array):
+        temp_list.append(current_smoothed_as_array[key].max())
     return temp_list
 
 
-def find_peak_index(array, peak_list):
+def find_peak_index(data_to_find_peak, peak_list):
     temp_list = []
-    for key, values in enumerate(array):
-        temp_list.append(np.where(array[key] == peak_list[key]))
+    for key, values in enumerate(data_to_find_peak):
+        temp_list.append(np.where(data_to_find_peak[key] == peak_list[key]))
     return temp_list
 
 
-def find_time_max(array, index_list):
+def find_index_related_data(time_data, index_list):
     temp_list = []
-    for key, value in enumerate(array):
-        temp_list.append(array[key][index_list[key]].tolist())
+    for key, value in enumerate(time_data):
+        temp_list.append(time_data[key][index_list[key]].tolist())
     return temp_list
 
 
@@ -87,12 +95,3 @@ def mobility_calculus(data_frame_with_required_data):
         )\
         .round(30)
     return mobility
-
-
-def find_displacement_current(dark_celiv_current_results):
-    displacement_current_values = pd.Series(
-            dark_celiv_current_results.iloc[len(dark_celiv_current_results) - 1, x]
-            for x in list(range(0, (len(dark_celiv_current_results.columns))))
-        ) \
-            .round(decimals=30)
-    return displacement_current_values

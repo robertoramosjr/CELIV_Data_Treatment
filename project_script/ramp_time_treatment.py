@@ -15,17 +15,13 @@ def sanitize_data_frames():
     odd_columns_subtracted = dt.equalize_data_frame_rows(odd_columns_subtracted, time_photo_celiv_ramp_time)
 
 
-DEVICE_THICKNESS = ask.device_thickness() * 10 ** (-9)
-DEVICE_AREA = ask.device_area() * 10 ** (-5)
+DEVICE_THICKNESS = ask.device_thickness() * cv.NANOMETER_TO_METER
+DEVICE_AREA = ask.device_area() * cv.SQR_CENTIMETER_TO_SQR_METER
 initial_ramp = ask.initial_ramp_rate()
 final_ramp = ask.final_ramp_rate() + 1000
-meas_number = ask.meas_number()
+meas_number = ask.meas_number('ramp time')
 ramp_step = ask.ramp_step()
 
-# initial_ramp = 50000
-# final_ramp = 60000 + 1000
-# meas_number = 7
-# ramp_step = 1000
 CHARGE_DENSITY_CALCULATION = cv.CTTS_PRODUCT / (DEVICE_AREA * DEVICE_THICKNESS)
 
 path_dark = ask.file_path("ramp time dark")
@@ -35,7 +31,10 @@ while not dt.is_valid_file(path_dark):
     path_dark = ask.file_path("dark-CELIV")
 
 
-current_dark_celiv_ramp_time = dt.separate_odd_columns(pd.read_table(path_dark, sep='\t', header=None)).abs().dropna()
+current_dark_celiv_ramp_time = dt.separate_odd_columns(dt.read_data(path_dark))
+
+
+current_dark_celiv_ramp_time_as_array = current_dark_celiv_ramp_time.transpose().to_numpy()
 
 path_photo = ask.file_path("ramp time photo")
 
@@ -43,7 +42,7 @@ while not dt.is_valid_file(path_photo):
     msgs.message_invalid_path()
     path_photo = ask.file_path("photo-celiv")
 
-current_photo_celiv_ramp_time = dt.separate_odd_columns(pd.read_table(path_photo, sep='\t', header=None)).abs()
+current_photo_celiv_ramp_time = dt.separate_odd_columns(dt.read_data(path_photo)).abs()
 
 time_photo_celiv_ramp_time = dt.separate_even_columns(pd.read_table(path_photo, sep='\t', header=None))
 
@@ -79,7 +78,9 @@ current_peaks = dt.find_peaks(odd_columns_subtracted_smoothed)
 
 indexes_list = dt.find_peak_index(odd_columns_subtracted_smoothed, current_peaks)
 
-time_max_values = dt.flatten_list_of_lists(dt.find_time_max(time_photo_celiv_ramp_time_transposed, indexes_list))
+time_max_values = dt.flatten_list_of_lists(
+    dt.find_index_related_data(time_photo_celiv_ramp_time_transposed, indexes_list)
+    )
 
 peak_values = pd.DataFrame([current_peaks, time_max_values])\
     .transpose()\
@@ -88,12 +89,16 @@ peak_values = pd.DataFrame([current_peaks, time_max_values])\
 peak_values['delta_j (A/m^2)'] = peak_values['current peak'] * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
 
 peak_values['first term of mobility calculations (cm^2/s)'] = (
-        ((cv.DEVICE_THICKNESS ** 2) * cv.SQR_METER_SQR_CENTIMETER_CONVERSION) /
+        ((cv.DEVICE_THICKNESS ** 2) * cv.SQR_METER_TO_SQR_CENTIMETER) /
         (2 * peak_values['peak time'] ** 2 * cv.SQUARED_TIME_CORRECTION_FACTOR)
     )\
     .round(decimals=30)
 
-displacement_current = dt.find_displacement_current(current_dark_celiv_ramp_time)
+displacement_current = pd.Series(
+    dt.flatten_list_of_lists(
+        dt.find_index_related_data(current_dark_celiv_ramp_time_as_array, indexes_list)
+        )
+    )
 
 peak_values['j0 (A/m^2)'] = displacement_current * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
 
