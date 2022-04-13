@@ -72,7 +72,7 @@ peaks_indexes_intensity = pd.Series(
         )
     )
 time_max_light_intensity = dt.flatten_list_of_lists(
-    dt.find_index_related_data(time_intensity_as_array, peaks_indexes_intensity)
+    dt.find_data_related_to_indexes(time_intensity_as_array, peaks_indexes_intensity)
     )
 results_intensity['peak time'] = pd.DataFrame([time_max_light_intensity]).transpose()
 
@@ -86,7 +86,7 @@ results_intensity['first term of mobility calculations (cm^2/s)'] = (
 
 displacement_current_intensity = pd.Series(
     dt.flatten_list_of_lists(
-        dt.find_index_related_data(dark_celiv_intensity_as_array, peaks_indexes_intensity)
+        dt.find_data_related_to_indexes(dark_celiv_intensity_as_array, peaks_indexes_intensity)
         )
     )
 results_intensity['j0 (A/m^2)'] = displacement_current_intensity * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
@@ -154,7 +154,7 @@ peaks_indexes_delay_time = pd.Series(
         )
     )
 time_max_delay_time = dt.flatten_list_of_lists(
-    dt.find_index_related_data(time_delay_time_as_array, peaks_indexes_delay_time)
+    dt.find_data_related_to_indexes(time_delay_time_as_array, peaks_indexes_delay_time)
     )
 results_delay_time['peak time'] = pd.DataFrame([time_max_delay_time]).transpose()
 results_delay_time['delta_j (A/m^2)'] = (
@@ -171,7 +171,7 @@ results_delay_time['first term of mobility calculations (cm^2/s)'] = (
 
 displacement_current_delay_time = pd.Series(
     dt.flatten_list_of_lists(
-        dt.find_index_related_data(dark_celiv_delay_time_as_array, peaks_indexes_delay_time)
+        dt.find_data_related_to_indexes(dark_celiv_delay_time_as_array, peaks_indexes_delay_time)
         )
     )
 results_delay_time['j0 (A/m^2)'] = displacement_current_delay_time * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
@@ -199,8 +199,8 @@ for k, v in enumerate(current_delay_time_subtracted_smoothed):
     ax2.plot(time_delay_time_as_array[k], current_delay_time_subtracted_smoothed[k])
 ax2.set_title('delay time CELIV')
 
-ax1.set(xlabel='Time (us)', ylabel='\u0394j (mA/cm^2)')
-ax2.set(xlabel='Time (us)', ylabel='\u0394j (mA/cm^2)')
+ax1.set(xlabel='Time (\u03BCs)', ylabel='\u0394j (mA/cm^2)')
+ax2.set(xlabel='Time (\u03BCs)', ylabel='\u0394j (mA/cm^2)')
 
 for k, v in enumerate(peaks_indexes_intensity):
     ax1.scatter(time_max_light_intensity[k], current_peaks_light_intensity[k])
@@ -209,6 +209,6 @@ for k, v in enumerate(peaks_indexes_delay_time):
 
 plt.show()
 
-output_data_intensity.to_csv(ask.file_name('intensity'), sep='\t', index=False)
+output_data_intensity.to_csv(ask.file_name('intensity').replace('\\', '/'), sep='\t', index=False)
 
-output_data_delay_time.to_csv(ask.file_name('delay time'), sep='\t', index=False)
+output_data_delay_time.to_csv(ask.file_name('delay time').replace('\\', '/'), sep='\t', index=False)

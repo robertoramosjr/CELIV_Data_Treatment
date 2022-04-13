@@ -52,7 +52,7 @@ sanitize_data_frames()
 
 data_ramp_time = pd.concat([time_photo_celiv_ramp_time, odd_columns_subtracted], axis=1).sort_index(axis=1)
 
-data_ramp_time.to_csv(ask.file_name('delta j'), sep='\t')     # line commented to run tests
+data_ramp_time.to_csv(ask.file_name('delta j').replace('\\', '/'), sep='\t', index=False, header=False)     # line commented to run tests
 
 data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
 
@@ -79,7 +79,7 @@ current_peaks = dt.find_peaks(odd_columns_subtracted_smoothed)
 indexes_list = dt.find_peak_index(odd_columns_subtracted_smoothed, current_peaks)
 
 time_max_values = dt.flatten_list_of_lists(
-    dt.find_index_related_data(time_photo_celiv_ramp_time_transposed, indexes_list)
+    dt.find_data_related_to_indexes(time_photo_celiv_ramp_time_transposed, indexes_list)
     )
 
 peak_values = pd.DataFrame([current_peaks, time_max_values])\
@@ -96,7 +96,7 @@ peak_values['first term of mobility calculations (cm^2/s)'] = (
 
 displacement_current = pd.Series(
     dt.flatten_list_of_lists(
-        dt.find_index_related_data(current_dark_celiv_ramp_time_as_array, indexes_list)
+        dt.find_data_related_to_indexes(current_dark_celiv_ramp_time_as_array, indexes_list)
         )
     )
 
@@ -108,9 +108,9 @@ peak_values['ramp rates (V/s)'] = pd.Series(list(range(initial_ramp, final_ramp,
 results['mobility (cm^2 / Vs)'] = dt.mobility_calculus(peak_values)
 
 
-results['ramp rate (V/s'] = peak_values['ramp rates (V/s)']
+results['ramp rate (V/s)'] = peak_values['ramp rates (V/s)']
 
-results.sort_index(axis=1, ascending=False).to_csv(ask.file_name('n e u'), sep='\t', index=False)
+results.sort_index(axis=1, ascending=False).to_csv(ask.file_name('n e u').replace('\\', '/'), sep='\t', index=False)
 
 for k, v in enumerate(odd_columns_subtracted_smoothed):
     plt.plot(time_photo_celiv_ramp_time_transposed[k], odd_columns_subtracted_smoothed[k])

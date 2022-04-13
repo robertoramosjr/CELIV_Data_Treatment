@@ -14,9 +14,9 @@ def separate_even_columns(data_frame):
 
 
 def read_data(path):
-    if path.endswith('.txt:'):
+    if path.endswith('.txt'):
         return pd.read_table(path, sep='\t', header=None)
-    elif path.endwith('.xlsx'):
+    elif path.endswith('.xlsx'):
         return pd.read_excel(path, sheet_name='Planilha1', header=None, engine="openpyxl")
 
 
@@ -62,7 +62,7 @@ def find_peak_index(data_to_find_peak, peak_list):
     return temp_list
 
 
-def find_index_related_data(time_data, index_list):
+def find_data_related_to_indexes(time_data, index_list):
     temp_list = []
     for key, value in enumerate(time_data):
         temp_list.append(time_data[key][index_list[key]].tolist())
