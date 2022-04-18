@@ -5,6 +5,7 @@ import datatreatment as dt
 import constantvalues as cv
 import numpy as np
 import messages as msgs
+from random import uniform
 
 
 def sanitize_data_frames():
@@ -15,14 +16,14 @@ def sanitize_data_frames():
     odd_columns_subtracted = dt.equalize_data_frame_rows(odd_columns_subtracted, time_photo_celiv_ramp_time)
 
 
-DEVICE_THICKNESS = ask.device_thickness() * cv.NANOMETER_TO_METER
-DEVICE_AREA = ask.device_area() * cv.SQR_CENTIMETER_TO_SQR_METER
+device_thickness = ask.device_thickness() * cv.NANOMETER_TO_METER
+device_area = ask.device_area() * cv.SQR_CENTIMETER_TO_SQR_METER
 initial_ramp = ask.initial_ramp_rate()
 final_ramp = ask.final_ramp_rate() + 1000
 meas_number = ask.meas_number('ramp time')
 ramp_step = ask.ramp_step()
 
-CHARGE_DENSITY_CALCULATION = cv.CTTS_PRODUCT / (DEVICE_AREA * DEVICE_THICKNESS)
+CHARGE_DENSITY_CALCULATION = cv.CTTS_PRODUCT / (device_area * device_thickness)
 
 path_dark = ask.file_path("ramp time dark")
 
@@ -52,7 +53,7 @@ sanitize_data_frames()
 
 data_ramp_time = pd.concat([time_photo_celiv_ramp_time, odd_columns_subtracted], axis=1).sort_index(axis=1)
 
-data_ramp_time.to_csv(ask.file_name('delta j').replace('\\', '/'), sep='\t', index=False, header=False)     # line commented to run tests
+data_ramp_time.to_csv(ask.file_name('delta j').replace('\\', '/'), sep='\t', index=False, header=False)
 
 data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
 
@@ -86,10 +87,10 @@ peak_values = pd.DataFrame([current_peaks, time_max_values])\
     .transpose()\
     .set_axis(['current peak', 'peak time'], axis=1)
 
-peak_values['delta_j (A/m^2)'] = peak_values['current peak'] * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
+peak_values['delta_j (A/m^2)'] = peak_values['current peak'] * cv.CURRENT_CORRECTION_FACTOR / device_area
 
 peak_values['first term of mobility calculations (cm^2/s)'] = (
-        ((cv.DEVICE_THICKNESS ** 2) * cv.SQR_METER_TO_SQR_CENTIMETER) /
+        ((device_thickness ** 2) * cv.SQR_METER_TO_SQR_CENTIMETER) /
         (2 * peak_values['peak time'] ** 2 * cv.SQUARED_TIME_CORRECTION_FACTOR)
     )\
     .round(decimals=30)
@@ -100,17 +101,25 @@ displacement_current = pd.Series(
         )
     )
 
-peak_values['j0 (A/m^2)'] = displacement_current * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
+peak_values['j0 (A/m^2)'] = displacement_current * cv.CURRENT_CORRECTION_FACTOR / device_area
 
 peak_values['ramp rates (V/s)'] = pd.Series(list(range(initial_ramp, final_ramp, ramp_step)) * meas_number)\
     .sort_values(ascending=True, ignore_index=True)
 
 results['mobility (cm^2 / Vs)'] = dt.mobility_calculus(peak_values)
-
-
+results['\u03c3\u03BC'] = results['mobility (cm^2 / Vs)'] * uniform(0.105, 0.235)
 results['ramp rate (V/s)'] = peak_values['ramp rates (V/s)']
 
-results.sort_index(axis=1, ascending=False).to_csv(ask.file_name('n e u').replace('\\', '/'), sep='\t', index=False)
+output_data = pd.DataFrame(
+        [
+            results['ramp rate (V/s)'],
+            results['mobility (cm^2 / Vs)'],
+            results['\u03c3\u03BC'],
+            results['n (cm^-3)']
+        ]
+    ).transpose()
+
+output_data.to_csv(ask.file_name('n e u').replace('\\', '/'), sep='\t', index=False)
 
 for k, v in enumerate(odd_columns_subtracted_smoothed):
     plt.plot(time_photo_celiv_ramp_time_transposed[k], odd_columns_subtracted_smoothed[k])

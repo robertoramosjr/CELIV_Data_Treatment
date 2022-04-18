@@ -21,7 +21,8 @@ def read_data(path):
 
 
 def is_valid_file(file_path):
-    return True if file_path != "" and os.path.exists(file_path) else False
+    return True if file_path != "" and os.path.exists(file_path)\
+            and (file_path.endswith('.txt') or file_path.endswith('.xlsx')) else False
 
 
 def is_bigger_data_frame(data_frame_1, data_frame_2):
@@ -36,7 +37,7 @@ def integrate_data(array_y, array_x):
     temp_list = []
     for key, value in enumerate(array_y):
         temp_list.append(
-            integrate.simps(array_y[key], array_x[key], even='avg')
+            integrate.trapezoid(array_y[key], array_x[key])
         )
     return temp_list
 
@@ -44,7 +45,7 @@ def integrate_data(array_y, array_x):
 def smooth_current_noise(current_data_as_array):
     temp_list = []
     for key, values in enumerate(current_data_as_array):
-        temp_list.append((savgol_filter(current_data_as_array[key], 60, 2).tolist()))
+        temp_list.append((savgol_filter(current_data_as_array[key], 65, 2).tolist()))
     return temp_list
 
 

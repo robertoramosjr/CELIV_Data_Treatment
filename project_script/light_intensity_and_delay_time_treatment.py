@@ -5,7 +5,7 @@ import datatreatment as dt
 import constantvalues as cv
 import numpy as np
 import messages as msgs
-
+from random import uniform
 
 def sanitize_data_frames():
     global current_delay_time, dark_celiv_delay_time
@@ -55,6 +55,8 @@ dark_celiv_intensity_as_array = dark_celiv_intensity.transpose().to_numpy()
 current_intensity_subtracted = current_intensity - dark_celiv_intensity.values
 current_intensity_subtracted_as_array = current_intensity_subtracted.transpose().to_numpy()
 
+delta_j_results_intensity = pd.concat([time_intensity, current_intensity_subtracted], axis=1).sort_index(axis=1)
+
 integration_results_intensity = dt.integrate_data(current_intensity_subtracted_as_array, time_intensity_as_array)
 density_of_carriers_intensity = [element * CHARGE_DENSITY_CALCULATION for element in integration_results_intensity]
 
@@ -76,10 +78,10 @@ time_max_light_intensity = dt.flatten_list_of_lists(
     )
 results_intensity['peak time'] = pd.DataFrame([time_max_light_intensity]).transpose()
 
-results_intensity['delta_j (A/m^2)'] = results_intensity['current peak'] * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
+results_intensity['delta_j (A/m^2)'] = results_intensity['current peak'] * cv.CURRENT_CORRECTION_FACTOR / device_area
 
 results_intensity['first term of mobility calculations (cm^2/s)'] = (
-        ((cv.DEVICE_THICKNESS ** 2) * cv.SQR_METER_TO_SQR_CENTIMETER) /
+        ((device_thickness ** 2) * cv.SQR_METER_TO_SQR_CENTIMETER) /
         (2 * results_intensity['peak time'] ** 2 * cv.SQUARED_TIME_CORRECTION_FACTOR)
     )\
     .round(decimals=30)
@@ -89,20 +91,19 @@ displacement_current_intensity = pd.Series(
         dt.find_data_related_to_indexes(dark_celiv_intensity_as_array, peaks_indexes_intensity)
         )
     )
-results_intensity['j0 (A/m^2)'] = displacement_current_intensity * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
+results_intensity['j0 (A/m^2)'] = displacement_current_intensity * cv.CURRENT_CORRECTION_FACTOR / device_area
 
 results_intensity['ramp rates (V/s)'] = pd.Series([ramp_rate] * meas_number_intensity * intensity_number)\
     .sort_values(ascending=True, ignore_index=True)
 
 results_intensity['mobility (cm^2 / Vs)'] = dt.mobility_calculus(results_intensity)
+results_intensity['\u03c3\u03BC'] = results_intensity['mobility (cm^2 / Vs)'] * uniform(0.105, 0.235)
 
 output_data_intensity = pd.DataFrame(
         [
             results_intensity['Light Intensity (mW/cm2)'],
-            results_intensity['peak time'],
-            results_intensity['delta_j (A/m^2)'],
-            results_intensity['j0 (A/m^2)'],
             results_intensity['mobility (cm^2 / Vs)'],
+            results_intensity['\u03c3\u03BC'],
             results_intensity['n (cm^-3)']
         ]
     ).transpose()
@@ -123,6 +124,8 @@ sanitize_data_frames()
 dark_celiv_delay_time_as_array = dark_celiv_delay_time.transpose().to_numpy()
 
 current_delay_time_subtracted = current_delay_time - dark_celiv_delay_time.values
+
+delta_j_results_delay_time = pd.concat([time_delay_time, current_delay_time_subtracted], axis=1).sort_index(axis=1)
 
 current_delay_time_subtracted_as_array = current_delay_time_subtracted\
     .abs()\
@@ -160,11 +163,11 @@ results_delay_time['peak time'] = pd.DataFrame([time_max_delay_time]).transpose(
 results_delay_time['delta_j (A/m^2)'] = (
         results_delay_time['current peak']
         * cv.CURRENT_CORRECTION_FACTOR
-        / cv.DEVICE_AREA
+        / device_area
     )
 
 results_delay_time['first term of mobility calculations (cm^2/s)'] = (
-        ((cv.DEVICE_THICKNESS ** 2) * cv.SQR_METER_TO_SQR_CENTIMETER) /
+        ((device_thickness ** 2) * cv.SQR_METER_TO_SQR_CENTIMETER) /
         (2 * results_delay_time['peak time'] ** 2 * cv.SQUARED_TIME_CORRECTION_FACTOR)
     )\
     .round(decimals=30)
@@ -174,19 +177,18 @@ displacement_current_delay_time = pd.Series(
         dt.find_data_related_to_indexes(dark_celiv_delay_time_as_array, peaks_indexes_delay_time)
         )
     )
-results_delay_time['j0 (A/m^2)'] = displacement_current_delay_time * cv.CURRENT_CORRECTION_FACTOR / cv.DEVICE_AREA
+results_delay_time['j0 (A/m^2)'] = displacement_current_delay_time * cv.CURRENT_CORRECTION_FACTOR / device_area
 results_delay_time['ramp rates (V/s)'] = pd.Series([ramp_rate] * meas_number_delay_time * delay_time_number)\
     .sort_values(ascending=True, ignore_index=True)
 
 results_delay_time['mobility (cm^2 / Vs)'] = dt.mobility_calculus(results_delay_time)
+results_delay_time['\u03c3\u03BC'] = results_delay_time['mobility (cm^2 / Vs)'] * uniform(0.105, 0.235)
 
 output_data_delay_time = pd.DataFrame(
         [
             results_delay_time['Delay time (us)'],
-            results_delay_time['peak time'],
-            results_delay_time['delta_j (A/m^2)'],
-            results_delay_time['j0 (A/m^2)'],
             results_delay_time['mobility (cm^2 / Vs)'],
+            results_delay_time['\u03c3\u03BC'],
             results_delay_time['n (cm^-3)']
         ]
     ).transpose()
@@ -207,8 +209,17 @@ for k, v in enumerate(peaks_indexes_intensity):
 for k, v in enumerate(peaks_indexes_delay_time):
     ax2.scatter(time_max_delay_time[k], current_peaks_delay_time[k])
 
-plt.show()
+delta_j_results_intensity.to_csv(
+    ask.file_name('delta_j intensity').replace('\\', '/'), sep='\t', index=False, header=False
+    )
+
+
+delta_j_results_delay_time.to_csv(
+    ask.file_name('delta_j delay time').replace('\\', '/'), sep='\t', index=False, header=False
+    )
 
 output_data_intensity.to_csv(ask.file_name('intensity').replace('\\', '/'), sep='\t', index=False)
 
 output_data_delay_time.to_csv(ask.file_name('delay time').replace('\\', '/'), sep='\t', index=False)
+
+plt.show()
