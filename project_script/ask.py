@@ -27,7 +27,7 @@ def final_ramp_rate():
 
 
 def meas_number(tipo_de_medida):
-    return int(input(f'Quantas medidas de um mesmo tipo os arquivos da {tipo_de_medida} possuem? \n'))
+    return int(input(f'Quantas medidas de um mesmo tipo os arquivos de {tipo_de_medida} possuem? \n'))
 
 
 def intensity_number():

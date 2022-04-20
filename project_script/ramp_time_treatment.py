@@ -31,7 +31,6 @@ while not dt.is_valid_file(path_dark):
     msgs.message_invalid_path()
     path_dark = ask.file_path("dark-CELIV")
 
-
 current_dark_celiv_ramp_time = dt.separate_odd_columns(dt.read_data(path_dark))
 
 
@@ -51,11 +50,29 @@ odd_columns_subtracted = current_photo_celiv_ramp_time.subtract(current_dark_cel
 
 sanitize_data_frames()
 
-data_ramp_time = pd.concat([time_photo_celiv_ramp_time, odd_columns_subtracted], axis=1).sort_index(axis=1)
+delta_j = pd.concat([time_photo_celiv_ramp_time, odd_columns_subtracted], axis=1).sort_index(axis=1)
 
-data_ramp_time.to_csv(ask.file_name('delta j').replace('\\', '/'), sep='\t', index=False, header=False)
+odd_columns_subtracted_corrected = odd_columns_subtracted / (device_area * pow(10, 4))
 
-data_ramp_time_transposed_in_arrays = data_ramp_time.transpose().to_numpy()
+delta_j_corrected = pd.concat([time_photo_celiv_ramp_time, odd_columns_subtracted_corrected], axis=1).sort_index(axis=1)
+
+delta_j_rearranged = pd.DataFrame()
+for i in range(meas_number):
+    for value in range((i*2), len(delta_j_corrected.columns), (meas_number*2)):
+        delta_j_rearranged = pd.concat(
+                [
+                    delta_j_rearranged, delta_j_corrected.iloc[:, value:(value+2)].reset_index()
+                ],
+                axis=1
+            )\
+            .drop(labels='index', axis=1)
+
+headers = sorted(list(range(initial_ramp, final_ramp, ramp_step)) * 2) * meas_number
+delta_j_rearranged.set_axis(headers, axis=1)\
+    .to_csv(ask.file_name('delta j').replace('\\', '/'), sep='\t', index=False)\
+
+
+delta_j_transposed_in_arrays = delta_j.transpose().to_numpy()
 
 time_photo_celiv_ramp_time_transposed = time_photo_celiv_ramp_time.dropna()\
     .transpose()\
