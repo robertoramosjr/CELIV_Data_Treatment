@@ -13,7 +13,15 @@ def sanitize_data_frames():
     if dt.is_bigger_data_frame(dark_celiv_delay_time, current_delay_time):
         dark_celiv_delay_time = dt.equalize_data_frame_rows(dark_celiv_delay_time, current_delay_time)
         return
-    current_delay_time = dt.matp(current_delay_time, dark_celiv_delay_time)
+    current_delay_time = dt.equalize_data_frame_rows(current_delay_time, dark_celiv_delay_time)
+
+
+def sanitize_current_time():
+    global current_delay_time_subtracted, time_delay_time
+    if dt.is_bigger_data_frame(time_delay_time, current_delay_time_subtracted):
+        time_delay_time = dt.equalize_data_frame_rows(time_delay_time, current_delay_time_subtracted)
+        return
+    current_delay_time_subtracted = dt.equalize_data_frame_rows(current_delay_time_subtracted, time_delay_time)
 
 
 intensity_path = ask.file_path("light instensity")
@@ -129,7 +137,7 @@ output_data_intensity = pd.DataFrame(
     ).transpose()
 
 time_delay_time = dt.separate_even_columns(data_file_delay_time).iloc[:, :]
-time_delay_time_as_array = time_delay_time.transpose().to_numpy()
+
 current_delay_time = dt.separate_odd_columns(data_file_delay_time).abs().iloc[:, :]
 
 
@@ -168,11 +176,14 @@ headers_delay_time = sorted(
     )\
     * meas_number_delay_time
 
+sanitize_current_time()
+
 current_delay_time_subtracted_as_array = current_delay_time_subtracted\
     .abs()\
     .transpose()\
     .to_numpy()\
     .round(decimals=30)
+time_delay_time_as_array = time_delay_time.transpose().to_numpy()
 
 integration_results_delay_time = dt.integrate_data(current_delay_time_subtracted_as_array, time_delay_time_as_array)
 density_of_carriers_delay_time = [element * CHARGE_DENSITY_CALCULATION for element in integration_results_delay_time]

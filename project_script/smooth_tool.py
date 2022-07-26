@@ -23,7 +23,8 @@ smoothed = np.array(dt.smooth_current_noise(to_smooth))
 smoothed_dataframe = pd.DataFrame(smoothed).transpose().set_axis(list(range(1, meas_number, 2)), axis=1)
 
 for k, v in enumerate(smoothed):
-    plt.plot(to_plot[k], smoothed[k])
+    plt.plot(to_plot[k], smoothed[k], '--')
+    plt.plot(to_plot[k], to_smooth[k])
 plt.xlabel('Time (\u03BC s)')
 plt.ylabel('\u0394 j (mA/cm\u00B2)')
 
