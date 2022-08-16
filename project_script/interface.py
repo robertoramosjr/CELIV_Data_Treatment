@@ -7,20 +7,21 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 def file_path_dark():
+    global filedark1
     filetypes = (('text files', '*.txt'), ('All files', '*.*'))
     filedark1 = fd.askopenfilename(title='Open dark CELIV file', initialdir='/', filetypes=filetypes).replace('/', '\\')
-    showinfo(title='filedark', message=filedark1)
+    #showinfo(title='filedark', message=filedark1)
     return filedark1
-    get_file_paths_dark(filedark1)
+
 
 def file_path_photo():
+    global filephoto1
     filetypes = (('text files', '*.txt'), ('All files', '*.*'))
     filephoto1 = fd.askopenfilename(title='Open Photo-CELIV file',
                                    initialdir='/', filetypes=filetypes).replace('/', '\\')
-    showinfo(title='filephoto', message=filephoto1)
+    #showinfo(title='filephoto', message=filephoto1)
     return filephoto1
-    #filedark.close()
-    get_file_photo(filephoto1)
+
 
 def get_input_valeues():
     unidade = int(entryvar.get())
@@ -29,8 +30,10 @@ def get_input_valeues():
     unidade4 = int(entryvar4.get())
     unidade5 = float(secao_transversal.get())
     unidade6 = float(espessura.get())
-    print(unidade5, unidade6, unidade, unidade2, unidade3, unidade4)
-    fig2 = calculos(unidade5, unidade6, unidade, unidade2, unidade3, unidade4)
+    unidade7 = savefile1.get()
+    unidade8 = savefile2.get()
+    print(unidade5, unidade6, unidade, unidade2, unidade3, unidade4, filedark1, filephoto1)
+    fig2 = calculos(unidade5, unidade6, unidade, unidade2, unidade3, unidade4,filedark1,filephoto1,unidade7,unidade8)
     grafico(fig2)
 
 

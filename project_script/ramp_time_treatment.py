@@ -32,19 +32,6 @@ def get_file_paths():
         msgs.message_invalid_path()
         path_photo = ask.file_path("photo-celiv")
 
-def get_file_dark(_filedark):
-    global path_dark
-    path_dark = _filedark
-    while not dt.is_valid_file(path_dark):
-        msgs.message_invalid_path
-        path_dark = _filedark
-
-def get_file_photo(_filephoto):
-    global path_photo
-    path_photo = _filephoto
-    while not dt.is_valid_file(path_photo):
-        msgs.message_invalid_path()
-        path_photo = _filephoto
 
 device_thickness = 0
 device_area = 0
@@ -71,8 +58,10 @@ def variaveis():
     meas_number = ask.meas_number('CELIV ramp time')
 
 
-def calculos(_device_thickness, _device_area, _initial_ramp_rate, _final_ramp_rate, _ramp_step, _meas_number):
-    get_file_paths()
+def calculos(_device_thickness, _device_area, _initial_ramp_rate, _final_ramp_rate, _ramp_step,
+             _meas_number,file_path_dark,file_path_photo,unidade7, unidade8):
+    path_dark=file_path_dark
+    path_photo=file_path_photo
     variaveis_interface(_device_thickness, _device_area, _initial_ramp_rate, _final_ramp_rate, _ramp_step, _meas_number)
     print(device_thickness, device_area, initial_ramp, final_ramp, ramp_step, meas_number)
     global time_photo_celiv_ramp_time, odd_columns_subtracted
@@ -187,9 +176,9 @@ def calculos(_device_thickness, _device_area, _initial_ramp_rate, _final_ramp_ra
 
 
     delta_j_rearranged.set_axis(headers, axis=1)\
-        .to_csv(ask.file_name('delta j').replace('\\', '/'), sep='\t', index=False, decimal=',')
+        .to_csv(unidade7.replace('\\', '/'), sep='\t', index=False, decimal=',')
 
-    output_data.to_csv(ask.file_name('n e u').replace('\\', '/'), sep='\t', index=False, decimal=',')
+    output_data.to_csv(unidade8.replace('\\', '/'), sep='\t', index=False, decimal=',')
 
     return fig2
 
