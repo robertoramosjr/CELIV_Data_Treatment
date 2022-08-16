@@ -16,6 +16,14 @@ def sanitize_data_frames():
     current_delay_time = dt.equalize_data_frame_rows(current_delay_time, dark_celiv_delay_time)
 
 
+def sanitize_current_time():
+    global current_delay_time_subtracted, time_delay_time
+    if dt.is_bigger_data_frame(time_delay_time, current_delay_time_subtracted):
+        time_delay_time = dt.equalize_data_frame_rows(time_delay_time, current_delay_time_subtracted)
+        return
+    current_delay_time_subtracted = dt.equalize_data_frame_rows(current_delay_time_subtracted, time_delay_time)
+
+
 intensity_path = ask.file_path("light instensity")
 while not dt.is_valid_file(intensity_path):
     msgs.message_invalid_path()
@@ -34,6 +42,9 @@ meas_number_intensity = ask.meas_number('CELIV intensidade')
 intensity_number = ask.intensity_number()
 
 meas_number_delay_time = ask.meas_number('CELIV delay time')
+
+first_delay_time = ask.first_delay_time()
+last_delay_time = ask.last_delay_time()
 delay_time_number = ask.delay_time_number()
 
 CHARGE_DENSITY_CALCULATION = cv.CTTS_PRODUCT / (device_area * device_thickness)
@@ -56,12 +67,10 @@ dark_celiv_intensity = dt.separate_odd_columns(
     )
 dark_celiv_intensity_as_array = dark_celiv_intensity.transpose().to_numpy()
 
-current_intensity_subtracted = current_intensity - dark_celiv_intensity.values
+current_intensity_subtracted = (current_intensity - dark_celiv_intensity.values)
 current_intensity_subtracted_as_array = current_intensity_subtracted.transpose().to_numpy()
-
-delta_j_results_intensity = pd.concat([time_intensity, current_intensity_subtracted], axis=1).sort_index(axis=1)
-
-delta_j_results_intensity_corrected = delta_j_results_intensity / (device_area * pow(10, 4))
+delta_j_intensity = pd.DataFrame(current_intensity_subtracted / (device_area * pow(10, 4)))
+delta_j_results_intensity_corrected = pd.concat([time_intensity, delta_j_intensity], axis=1).sort_index(axis=1)
 
 delta_j_results_intensity_rearranged = pd.DataFrame()
 for i in range(meas_number_intensity):
@@ -128,7 +137,7 @@ output_data_intensity = pd.DataFrame(
     ).transpose()
 
 time_delay_time = dt.separate_even_columns(data_file_delay_time).iloc[:, :]
-time_delay_time_as_array = time_delay_time.transpose().to_numpy()
+
 current_delay_time = dt.separate_odd_columns(data_file_delay_time).abs().iloc[:, :]
 
 
@@ -145,11 +154,11 @@ sanitize_data_frames()
 
 dark_celiv_delay_time_as_array = dark_celiv_delay_time.transpose().to_numpy()
 
-current_delay_time_subtracted = current_delay_time - dark_celiv_delay_time.values
+current_delay_time_subtracted = (current_delay_time - dark_celiv_delay_time.values)
+delta_j_delay_time = current_delay_time_subtracted / (device_area * pow(10, 4))
+delta_j_results_delay_time_corrected = pd.concat([time_delay_time, delta_j_delay_time], axis=1)\
+    .sort_index(axis=1)
 
-delta_j_results_delay_time = pd.concat([time_delay_time, current_delay_time_subtracted], axis=1).sort_index(axis=1)
-
-delta_j_results_delay_time_corrected = delta_j_results_delay_time / (device_area * pow(10, 4))
 delta_j_results_delay_time_rearranged = pd.DataFrame()
 for i in range(meas_number_delay_time):
     for value in range((i*2), len(delta_j_results_delay_time_corrected.columns), (meas_number_delay_time*2)):
@@ -163,15 +172,18 @@ for i in range(meas_number_delay_time):
             .drop(labels='index', axis=1)
 
 headers_delay_time = sorted(
-        list(np.logspace(cv.FIRST_DELAY_TIME, np.log10(cv.LAST_DELAY_TIME), delay_time_number)) * 2
+        list(np.logspace(np.log10(first_delay_time), np.log10(last_delay_time), delay_time_number)) * 2
     )\
     * meas_number_delay_time
+
+sanitize_current_time()
 
 current_delay_time_subtracted_as_array = current_delay_time_subtracted\
     .abs()\
     .transpose()\
     .to_numpy()\
     .round(decimals=30)
+time_delay_time_as_array = time_delay_time.transpose().to_numpy()
 
 integration_results_delay_time = dt.integrate_data(current_delay_time_subtracted_as_array, time_delay_time_as_array)
 density_of_carriers_delay_time = [element * CHARGE_DENSITY_CALCULATION for element in integration_results_delay_time]
@@ -179,7 +191,7 @@ density_of_carriers_delay_time = [element * CHARGE_DENSITY_CALCULATION for eleme
 results_delay_time = pd.DataFrame(
         ([
             sorted(
-                list(np.logspace(cv.FIRST_DELAY_TIME, np.log10(cv.LAST_DELAY_TIME), delay_time_number))
+                list(np.logspace(np.log10(first_delay_time), np.log10(last_delay_time), delay_time_number))
                 * meas_number_delay_time
             ),
             density_of_carriers_delay_time
@@ -190,6 +202,11 @@ results_delay_time = pd.DataFrame(
 
 
 current_delay_time_subtracted_smoothed = np.array(dt.smooth_current_noise(current_delay_time_subtracted_as_array))
+delta_j_delay_time_smoothed_array = current_delay_time_subtracted_smoothed / (device_area * pow(10, 4))
+delta_j_delay_time_smoothed = pd.DataFrame([delta_j_delay_time_smoothed_array.tolist()]).transpose()
+
+delta_j_delay_time_smoothed_complete = pd.concat([time_delay_time, delta_j_delay_time_smoothed], axis=1)\
+    .sort_index(axis=1)
 current_peaks_delay_time = dt.find_peaks(current_delay_time_subtracted_smoothed)
 results_delay_time['current peak'] = pd.DataFrame([current_peaks_delay_time]).transpose()
 
@@ -250,18 +267,18 @@ for k, v in enumerate(peaks_indexes_intensity):
     ax1.scatter(time_max_light_intensity[k], current_peaks_light_intensity[k])
 for k, v in enumerate(peaks_indexes_delay_time):
     ax2.scatter(time_max_delay_time[k], current_peaks_delay_time[k])
-plt.show()
+
 
 delta_j_results_intensity_rearranged.set_axis(headers, axis=1)\
     .to_csv(
-        ask.file_name('delta_j intensity').replace('\\', '/'), sep='\t', index=False
+        ask.file_name('delta_j intensity').replace('\\', '/'), sep='\t', index=False, decimal=','
     )
 
 delta_j_results_delay_time_rearranged.set_axis(headers_delay_time, axis=1)\
     .to_csv(
-        ask.file_name('delta_j delay time').replace('\\', '/'), sep='\t', index=False
+        ask.file_name('delta_j delay time').replace('\\', '/'), sep='\t', index=False, decimal=','
     )
 
-output_data_intensity.to_csv(ask.file_name('intensity').replace('\\', '/'), sep='\t', index=False)
+output_data_intensity.to_csv(ask.file_name('intensity').replace('\\', '/'), sep='\t', index=False, decimal=',')
 
-output_data_delay_time.to_csv(ask.file_name('delay time').replace('\\', '/'), sep='\t', index=False)
+output_data_delay_time.to_csv(ask.file_name('delay time').replace('\\', '/'), sep='\t', index=False, decimal=',')

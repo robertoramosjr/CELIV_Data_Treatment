@@ -1,3 +1,4 @@
+
 def file_name(data_name):
     return input(f"Insira o nome do arquivo para salvar os dados de {data_name} \n")
 
@@ -40,3 +41,11 @@ def delay_time_number():
 
 def ramp_step():
     return int(input('Qual o passo de variação da rampa de potencial entre uma medida e outra em V/s? \n'))
+
+
+def first_delay_time():
+    return float(input('Qual o primeiro delay time? \n'))
+
+
+def last_delay_time():
+    return float(input('Qual o último delay time? \n'))

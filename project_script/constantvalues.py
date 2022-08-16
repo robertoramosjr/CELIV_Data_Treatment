@@ -1,7 +1,5 @@
 ELECTRON_CHARGE = 1.6 * 10 ** (-19)
 
-DEVICE_AREA = 1.4 * 10 ** (-5)
-
 DEVICE_THICKNESS = 478 * 10 ** (-9)
 
 INTEGRAL_CORRECTION_FACTOR = 1 * 10 ** (-9)
@@ -22,7 +20,3 @@ NANOMETER_TO_METER = pow(10, -9)
 SQR_CENTIMETER_TO_SQR_METER = pow(10, -4)
 
 INTENSITIES = [(n * 7.2) for n in list(range(1, 11))]
-
-FIRST_DELAY_TIME = 0
-
-LAST_DELAY_TIME = 100
