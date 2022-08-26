@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import ask
 import datatreatment as dt
 import constantvalues as cv
 import numpy as np
@@ -20,17 +19,6 @@ def sanitize_data_frames():
 
 path_dark = 0
 path_photo = 0
-def get_file_paths():
-    global path_dark, path_photo
-    path_dark = ask.file_path('ramp time dark')
-    while not dt.is_valid_file(path_dark):
-        msgs.message_invalid_path()
-        path_dark = ask.file_path("dark-CELIV")
-
-    path_photo = ask.file_path('ramp time photo')
-    while not dt.is_valid_file(path_photo):
-        msgs.message_invalid_path()
-        path_photo = ask.file_path("photo-celiv")
 
 
 device_thickness = 0
@@ -49,22 +37,14 @@ def variaveis_interface(_device_thickness,_device_area,_initial_ramp_rate,_final
     ramp_step = _ramp_step
     meas_number = _meas_number
 
-def variaveis():
-    device_thickness = ask.device_thickness() * cv.NANOMETER_TO_METER
-    device_area = ask.device_area() * cv.SQR_CENTIMETER_TO_SQR_METER
-    initial_ramp = ask.initial_ramp_rate()
-    final_ramp = ask.final_ramp_rate() + 1000
-    ramp_step = ask.ramp_step()
-    meas_number = ask.meas_number('CELIV ramp time')
-
 
 def calculos(_device_thickness, _device_area, _initial_ramp_rate, _final_ramp_rate, _ramp_step,
              _meas_number,file_path_dark,file_path_photo,unidade7, unidade8):
     path_dark=file_path_dark
     path_photo=file_path_photo
     variaveis_interface(_device_thickness, _device_area, _initial_ramp_rate, _final_ramp_rate, _ramp_step, _meas_number)
-    print(device_thickness, device_area, initial_ramp, final_ramp, ramp_step, meas_number)
     global time_photo_celiv_ramp_time, odd_columns_subtracted
+
     CHARGE_DENSITY_CALCULATION = cv.CTTS_PRODUCT / (device_area * device_thickness)
 
     current_dark_celiv_ramp_time = dt.separate_odd_columns(dt.read_data(path_dark)).abs()
