@@ -45,7 +45,7 @@ def integrate_data(array_y, array_x):
 def smooth_current_noise(current_data_as_array):
     temp_list = []
     for key, values in enumerate(current_data_as_array):
-        temp_list.append((savgol_filter(current_data_as_array[key], 65, 2).tolist()))
+        temp_list.append((savgol_filter(current_data_as_array[key], 65, 1).tolist()))
     return temp_list
 
 
